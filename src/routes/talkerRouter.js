@@ -75,4 +75,15 @@ talkerRouter.put('/:id',
     return res.status(200).json(updateTalker);
   });
 
+talkerRouter.delete('/:id', validateAuthorization, async (req, res) => {
+  const { id } = req.params;
+  const response = await fs.readFile(filePath, 'utf-8');
+  const dataTalker = JSON.parse(response);
+
+  const newDataTalker = dataTalker.filter((talker) => talker.id !== Number(id));
+  const data = JSON.stringify(newDataTalker);
+  await fs.writeFile(filePath, data);
+  return res.status(204).end();
+});
+
 module.exports = talkerRouter;
