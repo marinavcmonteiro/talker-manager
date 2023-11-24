@@ -1,6 +1,11 @@
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
+const validateAuthorization = require('../middlewares/validateAuthorization');
+const validateName = require('../middlewares/validateName');
+const validateAge = require('../middlewares/validateAge');
+const validateTalk = require('../middlewares/validateTalk');
+const validateRate = require('../middlewares/validateRate');
 
 const talkerRouter = express.Router();
 
@@ -26,5 +31,24 @@ talkerRouter.get('/:id', async (req, res) => {
 
   return res.status(200).json(talkerById);
 });
+
+talkerRouter.post('/', 
+  validateAuthorization, 
+  validateName, 
+  validateAge,
+  validateTalk,
+  validateRate,
+  async (req, res) => {
+    const response = await fs.readFile(filePath, 'utf-8');
+    const dataTalker = JSON.parse(response);
+    const nextId = Number(dataTalker.slice(-1)[0].id) + 1;
+    const newTalker = { ...req.body, id: nextId };
+
+    dataTalker.push(newTalker);
+    const newData = JSON.stringify(dataTalker);
+    await fs.writeFile(filePath, newData);
+
+    return res.status(201).json(newTalker);
+  });
 
 module.exports = talkerRouter;
