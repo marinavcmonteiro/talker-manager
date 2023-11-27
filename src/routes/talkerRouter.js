@@ -6,10 +6,35 @@ const validateName = require('../middlewares/validateName');
 const validateAge = require('../middlewares/validateAge');
 const validateTalk = require('../middlewares/validateTalk');
 const validateRate = require('../middlewares/validateRate');
+const validateSearchRate = require('../middlewares/validateSearchRate');
+const validateSearchDate = require('../middlewares/validateSearchDate');
+// const validateSearchDate = require('../middlewares/validateSearchDate');
 
 const talkerRouter = express.Router();
 
 const filePath = path.join(__dirname, '../talker.json');
+
+talkerRouter.get('/search', 
+  validateAuthorization, 
+  validateSearchRate,
+  validateSearchDate,
+  async (req, res) => {
+    const response = await fs.readFile(filePath, 'utf-8');
+    let dataTalker = JSON.parse(response);
+    const { q, rate, date } = req.query;
+    if (date !== '' && date !== undefined) {
+      dataTalker = dataTalker.filter((talker) => 
+        talker.talk.watchedAt.split('/').join() === date.split('/').join());
+    }
+    if (q) {
+      dataTalker = dataTalker.filter((talker) => 
+        talker.name.toLowerCase().includes(q.toLowerCase()));
+    }
+    if (rate) {
+      dataTalker = dataTalker.filter((talker) => talker.talk.rate === Number(rate));
+    }
+    return res.status(200).json(dataTalker);
+  });
 
 talkerRouter.get('/', async (_req, res) => {
   const response = await fs.readFile(filePath, 'utf-8');
