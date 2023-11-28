@@ -111,4 +111,19 @@ talkerRouter.delete('/:id', validateAuthorization, async (req, res) => {
   return res.status(204).end();
 });
 
+talkerRouter.patch('/rate/:id', validateAuthorization, validateRate, async (req, res) => {
+  const response = await fs.readFile(filePath, 'utf-8');
+  let dataTalker = JSON.parse(response);
+  const { id } = req.params;
+
+  const updateTalkerRate = dataTalker.find((talker) => talker.id === Number(id));
+  updateTalkerRate.talk.rate = req.body.rate;
+  dataTalker = dataTalker.filter((talker) => talker.id !== Number(id));
+  dataTalker.push(updateTalkerRate);
+  const data = JSON.stringify(dataTalker);
+  await fs.writeFile(filePath, data);
+
+  return res.status(204).end();
+});
+
 module.exports = talkerRouter;

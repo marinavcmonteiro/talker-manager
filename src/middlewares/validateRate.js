@@ -1,5 +1,10 @@
+const getRate = (req) => {
+  const { rate } = req.body.talk || req.body;
+  return rate;
+};
+
 const validateRate = (req, res, next) => {
-  const { rate } = req.body.talk;
+  const rate = getRate(req);
   if (rate === undefined) {
     return res.status(400)
       .json({ message: 'O campo "rate" é obrigatório' });
